@@ -1,0 +1,101 @@
+step-by-step guide to setting up a Git repository for your AI Question Bank POC, linking both your backend and frontend under one organized workspace.
+
+Step 1: Create a .gitignore at the Root Directory
+Before initializing Git, create a .gitignore file in your main root project folder (AIQuestionBank/). This prevents uploading secrets (.env), heavy dependencies (node_modules, .venv), and build artifacts.
+
+Run this in PowerShell at the root folder (C:\xampp\htdocs\AIQuestionBank):
+
+PowerShell
+New-Item -Path .gitignore -ItemType File -Force
+
+    Directory: C:\xampp\htdocs\AIQuestionBank
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/3/2026   7:30 PM              0 .gitignore
+
+Open .gitignore and paste the following standard rules:
+
+Code snippet
+# Environment Variables & Secrets
+.env
+.env*.local
+
+# Python / Virtual Environment
+.venv/
+__pycache__/
+*.py[cod]
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Database & Uploads
+*.db
+*.sqlite3
+uploads/*
+exports/*
+!.gitkeep
+
+# IDEs & System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Step 2: Initialize Git & Commit Files
+Run the following commands in PowerShell from your main AIQuestionBank directory:
+
+PowerShell
+# 1. Initialize Git repository
+git init
+
+# 2. Stage all files
+git add .
+
+# 3. Check status (verify no node_modules or .venv are listed in green)
+git status
+
+# 4. Make your initial commit
+git commit -m "Initial commit: AI Question Bank POC setup"
+Step 3: Create and Connect Remote Repository (GitHub / GitLab)
+Option A: Using GitHub Web UI
+Go to github.com/new.
+
+Name your repository: AIQuestionBank (or AIQuestionBank-POC).
+
+Set visibility to Private or Public.
+
+Do NOT check "Add a README" or "Add .gitignore" (we already created them locally).
+
+Click Create repository.
+
+Copy and paste the commands under "…or push an existing repository from the command line" into your terminal:
+
+PowerShell
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/AIQuestionBank.git
+git push -u origin main
+Option B: Using GitHub CLI (gh)
+If you have GitHub CLI installed, you can create and push in one command directly from PowerShell:
+
+PowerShell
+gh repo create AIQuestionBank --private --source=. --remote=origin --push
+Recommended Workspace Structure Summary
+Your repository is now set up with this clean standard structure:
+
+Plaintext
+AIQuestionBank/
+├── .gitignore
+├── README.md
+├── backend/
+│   ├── app/
+│   ├── .venv/       (ignored by git)
+│   ├── .env        (ignored by git)
+│   └── requirements.txt
+└── frontend/
+    ├── src/
+    ├── node_modules/ (ignored by git)
+    ├── .env.local    (ignored by git)
+    └── package.json
