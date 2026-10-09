@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Question Bank",
-  description: "AI-powered question bank generator and evaluator",
+  title: "TalentAssess AI - PamTen",
+  description: "AI Recruitment & Assessment Platform - Driven to Transform",
   icons: {
-    icon: "/logo.png", // Path to your logo inside public/
+    icon: "/pamten_logo.png",
   },
 };
 
