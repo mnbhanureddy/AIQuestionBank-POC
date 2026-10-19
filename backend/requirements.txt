@@ -13,3 +13,5 @@ python-multipart
 PyMuPDF
 python-docx
 python-pptx
+pytesseract
+Pillow
