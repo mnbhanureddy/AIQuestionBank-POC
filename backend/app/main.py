@@ -1,3 +1,4 @@
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
 from fastapi import FastAPI, Form, File, UploadFile, HTTPException, Depends, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,7 +32,7 @@ app = FastAPI(title="AI Recruitment & Training Assessment Platform")
 # Allow requests from your Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", os.getenv("FRONTEND_BASE_URL", "").rstrip("/")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

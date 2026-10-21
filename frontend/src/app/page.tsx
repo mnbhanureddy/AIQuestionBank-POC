@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-
+const API = process.env.NEXT_PUBLIC_API ?? 'http://localhost:8000';
 interface Question {
   question_type: string;
   question_text: string;
@@ -306,7 +306,7 @@ export default function Home() {
       setAuthChecked(true);
       return;
     }
-    fetch('http://localhost:8000/api/v1/auth/me', {
+    fetch('${API}/api/v1/auth/me', {
       headers: { Authorization: `Bearer ${saved}` },
     })
       .then((res) => {
@@ -351,7 +351,7 @@ export default function Home() {
       formData.append('username', loginEmail.trim()); // OAuth2PasswordRequestForm spec uses "username" for the email
       formData.append('password', loginPassword);
 
-      const res = await fetch('http://localhost:8000/api/v1/auth/login', {
+      const res = await fetch('${API}/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
@@ -399,7 +399,7 @@ export default function Home() {
       formData.append('username', candidateLoginEmail.trim());
       formData.append('password', candidateLoginPassword);
 
-      const res = await fetch('http://localhost:8000/api/v1/auth/login', {
+      const res = await fetch('${API}/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
@@ -434,7 +434,7 @@ export default function Home() {
 
     setAuthLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/v1/auth/register-candidate', {
+      const res = await fetch('${API}/api/v1/auth/register-candidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -467,7 +467,7 @@ export default function Home() {
     if (!token) return;
     setLoadingMyAssessments(true);
     try {
-      const res = await fetch('http://localhost:8000/api/v1/candidate/my-assessments', {
+      const res = await fetch('${API}/api/v1/candidate/my-assessments', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -485,7 +485,7 @@ export default function Home() {
     if (!token) return;
     setLoadingMyReports(true);
     try {
-      const res = await fetch('http://localhost:8000/api/v1/candidate/my-reports', {
+      const res = await fetch('${API}/api/v1/candidate/my-reports', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -503,7 +503,7 @@ export default function Home() {
     setCandidateReportModalOpen(true);
     setCandidateViewingReport(null);
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/candidate/my-reports/${reportId}`);
+      const res = await authFetch(`${API}/api/v1/candidate/my-reports/${reportId}`);
       if (!res.ok) {
         const err = await res.json().catch(() => null);
         throw new Error(err?.detail || 'Failed to load evaluation report details');
@@ -522,7 +522,7 @@ export default function Home() {
     setCandidateReportModalOpen(true);
     setCandidateViewingReport(null);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/assessment/public-report/${token}`);
+      const res = await fetch(`${API}/api/v1/assessment/public-report/${token}`);
       if (!res.ok) {
         const err = await res.json().catch(() => null);
         throw new Error(err?.detail || 'Failed to load evaluation report');
@@ -554,7 +554,7 @@ export default function Home() {
       if (registerFullName) formData.append('full_name', registerFullName);
       if (registerOrgName) formData.append('organization_name', registerOrgName);
 
-      const res = await fetch('http://localhost:8000/api/v1/auth/register', {
+      const res = await fetch('${API}/api/v1/auth/register', {
         method: 'POST',
         body: formData,
       });
@@ -618,7 +618,7 @@ export default function Home() {
       formData.append('email', email);
       formData.append('new_password', forgotNewPassword);
 
-      const res = await fetch('http://localhost:8000/api/v1/auth/forgot-password', {
+      const res = await fetch('${API}/api/v1/auth/forgot-password', {
         method: 'POST',
         body: formData,
       });
@@ -700,7 +700,7 @@ export default function Home() {
       formData.append('full_name', profileFullName);
       formData.append('organization_name', profileOrgName);
 
-      const res = await authFetch('http://localhost:8000/api/v1/auth/me', {
+      const res = await authFetch('${API}/api/v1/auth/me', {
         method: 'PUT',
         body: formData,
       });
@@ -785,7 +785,7 @@ export default function Home() {
       formData.append('current_password', currentPassword);
       formData.append('new_password', newPassword);
 
-      const res = await authFetch('http://localhost:8000/api/v1/auth/change-password', {
+      const res = await authFetch('${API}/api/v1/auth/change-password', {
         method: 'POST',
         body: formData,
       });
@@ -929,7 +929,7 @@ export default function Home() {
     const targetMonth = monthOverride || adminMonth;
     setLoadingAdminStats(true);
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/admin/dashboard-stats?month=${targetMonth}`);
+      const res = await authFetch(`${API}/api/v1/admin/dashboard-stats?month=${targetMonth}`);
       if (!res.ok) throw new Error('Failed to fetch dashboard stats');
       const data = await res.json();
       setAdminStats(data);
@@ -947,7 +947,7 @@ export default function Home() {
     setLoadingRecruitersList(true);
     try {
       const roleParam = targetRole && targetRole !== 'all' ? `&role=${targetRole}` : '';
-      const res = await authFetch(`http://localhost:8000/api/v1/admin/recruiters-list?month=${targetMonth}&year=${targetYear}${roleParam}`);
+      const res = await authFetch(`${API}/api/v1/admin/recruiters-list?month=${targetMonth}&year=${targetYear}${roleParam}`);
       if (!res.ok) throw new Error('Failed to fetch recruiters list');
       const data = await res.json();
       setRecruitersList(data.recruiters || []);
@@ -962,7 +962,7 @@ export default function Home() {
     const targetYear = yearOverride || adminYear;
     setLoadingYearlyPerf(true);
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/admin/yearly-performance?year=${targetYear}`);
+      const res = await authFetch(`${API}/api/v1/admin/yearly-performance?year=${targetYear}`);
       if (!res.ok) throw new Error('Failed to fetch yearly performance');
       const data = await res.json();
       setYearlyPerformanceData(data);
@@ -976,7 +976,7 @@ export default function Home() {
   const handleExportYearlyPerformance = async (yearOverride?: number) => {
     const targetYear = yearOverride || adminYear;
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/admin/export-yearly-performance?year=${targetYear}`);
+      const res = await authFetch(`${API}/api/v1/admin/export-yearly-performance?year=${targetYear}`);
       if (!res.ok) throw new Error('Export failed');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -1000,7 +1000,7 @@ export default function Home() {
       formData.append('report_id', String(reportId));
       formData.append('is_onboarded', String(!currentStatus));
 
-      const res = await authFetch('http://localhost:8000/api/v1/assessment/toggle-onboard', {
+      const res = await authFetch('${API}/api/v1/assessment/toggle-onboard', {
         method: 'POST',
         body: formData,
       });
@@ -1059,7 +1059,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append('new_password', resetTempPassword);
 
-      const res = await authFetch('http://localhost:8000/api/v1/auth/reset-temporary-password', {
+      const res = await authFetch('${API}/api/v1/auth/reset-temporary-password', {
         method: 'POST',
         body: formData,
       });
@@ -1411,8 +1411,8 @@ export default function Home() {
     try {
       const targetSourceId = srcId !== undefined ? srcId : sourceId;
       const url = targetSourceId
-        ? `http://localhost:8000/api/v1/dimensions-skills?source_id=${targetSourceId}`
-        : 'http://localhost:8000/api/v1/dimensions-skills';
+        ? `${API}/api/v1/dimensions-skills?source_id=${targetSourceId}`
+        : '${API}/api/v1/dimensions-skills';
       const res = await authFetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -1438,7 +1438,7 @@ export default function Home() {
         dimensions: matrixDimensions,
         source_material_id: sourceId,
       };
-      const res = await authFetch('http://localhost:8000/api/v1/dimensions-skills', {
+      const res = await authFetch('${API}/api/v1/dimensions-skills', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -1458,7 +1458,7 @@ export default function Home() {
   const handleFetchTemplates = async () => {
     setLoadingTemplates(true);
     try {
-      const res = await authFetch('http://localhost:8000/api/v1/dimensions-skills/templates');
+      const res = await authFetch('${API}/api/v1/dimensions-skills/templates');
       if (res.ok) {
         const data = await res.json();
         setAvailableTemplates(data.templates || []);
@@ -1596,8 +1596,8 @@ export default function Home() {
         dimensions: tplFormDimensions,
       };
       const url = editingTemplateId
-        ? `http://localhost:8000/api/v1/dimensions-skills/templates/${editingTemplateId}`
-        : 'http://localhost:8000/api/v1/dimensions-skills/templates';
+        ? `${API}/api/v1/dimensions-skills/templates/${editingTemplateId}`
+        : '${API}/api/v1/dimensions-skills/templates';
       const method = editingTemplateId ? 'PUT' : 'POST';
 
       const res = await authFetch(url, {
@@ -1626,7 +1626,7 @@ export default function Home() {
     }
     setDeletingTemplateId(templateId);
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/dimensions-skills/templates/${templateId}`, {
+      const res = await authFetch(`${API}/api/v1/dimensions-skills/templates/${templateId}`, {
         method: 'DELETE',
       });
       if (!res.ok) {
@@ -1660,7 +1660,7 @@ export default function Home() {
         description: saveAsTplDesc.trim(),
         dimensions: matrixDimensions,
       };
-      const res = await authFetch('http://localhost:8000/api/v1/dimensions-skills/templates', {
+      const res = await authFetch('${API}/api/v1/dimensions-skills/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -1752,7 +1752,7 @@ export default function Home() {
         role_title: aiExtractRoleInput || skillMatrixRoleTitle || topic || '',
         source_id: sourceId,
       };
-      const res = await authFetch('http://localhost:8000/api/v1/dimensions-skills/ai-extract', {
+      const res = await authFetch('${API}/api/v1/dimensions-skills/ai-extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -2138,7 +2138,7 @@ export default function Home() {
     if (!token) return;
     setLoadingReports(true);
     try {
-      const res = await authFetch('http://localhost:8000/api/v1/reports');
+      const res = await authFetch('${API}/api/v1/reports');
       if (!res.ok) {
         if (res.status === 401) return;
         throw new Error('Failed to load past reports.');
@@ -2507,8 +2507,8 @@ export default function Home() {
     if (!token) return;
     try {
       const url = srcId
-        ? `http://localhost:8000/api/v1/job-match/latest?source_id=${srcId}`
-        : 'http://localhost:8000/api/v1/job-match/latest';
+        ? `${API}/api/v1/job-match/latest?source_id=${srcId}`
+        : '${API}/api/v1/job-match/latest';
       const res = await authFetch(url);
       if (!res.ok) return;
       const data = await res.json();
@@ -2538,7 +2538,7 @@ export default function Home() {
     if (!token) return;
     setLoadingInvitations(true);
     try {
-      const res = await authFetch('http://localhost:8000/api/v1/assessment/invitations');
+      const res = await authFetch('${API}/api/v1/assessment/invitations');
       if (!res.ok) return;
       const data = await res.json();
       setInvitations(Array.isArray(data) ? data : []);
@@ -2555,7 +2555,7 @@ export default function Home() {
     if (!token) return;
     setLoadingNotifications(true);
     try {
-      const res = await authFetch('http://localhost:8000/api/v1/notifications');
+      const res = await authFetch('${API}/api/v1/notifications');
       if (!res.ok) return;
       const data = await res.json();
       const notifs: RecruiterNotificationItem[] = Array.isArray(data.notifications) ? data.notifications : [];
@@ -2593,7 +2593,7 @@ export default function Home() {
   const handleMarkNotificationRead = async (notifId: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/notifications/${notifId}/read`, {
+      const res = await authFetch(`${API}/api/v1/notifications/${notifId}/read`, {
         method: 'POST',
       });
       if (res.ok) {
@@ -2607,7 +2607,7 @@ export default function Home() {
 
   const handleMarkAllNotificationsRead = async () => {
     try {
-      const res = await authFetch('http://localhost:8000/api/v1/notifications/mark-all-read', {
+      const res = await authFetch('${API}/api/v1/notifications/mark-all-read', {
         method: 'POST',
       });
       if (res.ok) {
@@ -2623,7 +2623,7 @@ export default function Home() {
   const handleDeleteNotification = async (notifId: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/notifications/${notifId}`, {
+      const res = await authFetch(`${API}/api/v1/notifications/${notifId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -2667,7 +2667,7 @@ export default function Home() {
         headers['Authorization'] = `Bearer ${savedToken}`;
       }
 
-      const res = await fetch('http://localhost:8000/api/v1/assessment/submit-candidate-assessment', {
+      const res = await fetch('${API}/api/v1/assessment/submit-candidate-assessment', {
         method: 'POST',
         headers,
         body: formData,
@@ -2758,7 +2758,7 @@ export default function Home() {
   const loadCandidateAssessment = async (token: string) => {
     setLoadingCandidateAssessment(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/assessment/invitation/${token}`);
+      const res = await fetch(`${API}/api/v1/assessment/invitation/${token}`);
       if (!res.ok) {
         throw new Error('Assessment invitation link is invalid or has expired.');
       }
@@ -2925,7 +2925,7 @@ export default function Home() {
       formData.append('candidates', JSON.stringify(candidatePayload));
       formData.append('duration_minutes', durationMinutes.toString());
 
-      const res = await authFetch('http://localhost:8000/api/v1/assessment/invite-candidates', {
+      const res = await authFetch('${API}/api/v1/assessment/invite-candidates', {
         method: 'POST',
         body: formData,
       });
@@ -3006,7 +3006,7 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append('invitation_id', invitationId.toString());
-      const res = await authFetch('http://localhost:8000/api/v1/assessment/resend-invitation', {
+      const res = await authFetch('${API}/api/v1/assessment/resend-invitation', {
         method: 'POST',
         body: formData,
       });
@@ -3070,7 +3070,7 @@ export default function Home() {
   const handlePreviewInvitationEmail = async (inv: any) => {
     setPreviewLoadingId(inv.invitation_id);
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/assessment/invitation-preview/${inv.invitation_id}`);
+      const res = await authFetch(`${API}/api/v1/assessment/invitation-preview/${inv.invitation_id}`);
       if (!res.ok) throw new Error('Failed to load email preview.');
       const data = await res.json();
       setPreviewEmailData(data);
@@ -3147,7 +3147,7 @@ export default function Home() {
   const viewReport = async (reportId: number) => {
     setLoadingReportDetail(true);
     try {
-      const res = await authFetch(`http://localhost:8000/api/v1/reports/${reportId}`);
+      const res = await authFetch(`${API}/api/v1/reports/${reportId}`);
       if (!res.ok) throw new Error('Not found');
       const data = await res.json();
       setSelectedReport(data);
@@ -3216,7 +3216,7 @@ export default function Home() {
         formData.append('file', file);
         formData.append('organization_name', organizationName);
 
-        const res = await authFetch('http://localhost:8000/api/v1/content/upload', {
+        const res = await authFetch('${API}/api/v1/content/upload', {
           method: 'POST',
           body: formData,
         });
@@ -3245,7 +3245,7 @@ export default function Home() {
         const formData = new FormData();
         formData.append('topic', topic);
         formData.append('organization_name', organizationName);
-        const res = await authFetch('http://localhost:8000/api/v1/content/topic', {
+        const res = await authFetch('${API}/api/v1/content/topic', {
           method: 'POST',
           body: formData,
         });
@@ -3302,7 +3302,7 @@ export default function Home() {
         formData.append('source_id', sourceId.toString());
         resumeFiles.forEach((f) => formData.append('files', f));
 
-        const res = await authFetch('http://localhost:8000/api/v1/candidate/resume/upload-multiple', {
+        const res = await authFetch('${API}/api/v1/candidate/resume/upload-multiple', {
           method: 'POST',
           body: formData,
         });
@@ -3322,7 +3322,7 @@ export default function Home() {
         formData.append('source_id', sourceId.toString());
         if (candidateName) formData.append('candidate_name', candidateName);
 
-        const res = await authFetch('http://localhost:8000/api/v1/candidate/resume/upload', {
+        const res = await authFetch('${API}/api/v1/candidate/resume/upload', {
           method: 'POST',
           body: formData,
         });
@@ -3337,7 +3337,7 @@ export default function Home() {
         formData.append('source_id', sourceId.toString());
         if (candidateName) formData.append('candidate_name', candidateName);
 
-        const res = await authFetch('http://localhost:8000/api/v1/candidate/resume/text', {
+        const res = await authFetch('${API}/api/v1/candidate/resume/text', {
           method: 'POST',
           body: formData,
         });
@@ -3375,7 +3375,7 @@ export default function Home() {
       formData.append('source_id', sourceId.toString());
       formData.append('resume_ids', JSON.stringify(targetIds));
 
-      const res = await authFetch('http://localhost:8000/api/v1/job-match/analyze-batch', {
+      const res = await authFetch('${API}/api/v1/job-match/analyze-batch', {
         method: 'POST',
         body: formData,
       });
@@ -3485,7 +3485,7 @@ export default function Home() {
         formData.append('question_type', questionType);
         if (sourceId !== null) formData.append('source_id', sourceId.toString());
 
-        const res = await authFetch('http://localhost:8000/api/v1/questions/generate', {
+        const res = await authFetch('${API}/api/v1/questions/generate', {
           method: 'POST',
           body: formData,
         });
@@ -3665,7 +3665,7 @@ export default function Home() {
       formData.append('question_type', questionType);
       if (sourceId !== null) formData.append('source_id', sourceId.toString());
 
-      const res = await authFetch('http://localhost:8000/api/v1/questions/generate', {
+      const res = await authFetch('${API}/api/v1/questions/generate', {
         method: 'POST',
         body: formData,
       });
@@ -3695,7 +3695,7 @@ export default function Home() {
       inviteFormData.append('candidates', JSON.stringify(targetCandidates));
       inviteFormData.append('duration_minutes', durationMinutes.toString());
 
-      const inviteRes = await authFetch('http://localhost:8000/api/v1/assessment/invite-candidates', {
+      const inviteRes = await authFetch('${API}/api/v1/assessment/invite-candidates', {
         method: 'POST',
         body: inviteFormData,
       });
@@ -3754,7 +3754,7 @@ export default function Home() {
           formData.append('user_answer', answer);
           formData.append('max_marks', '10');
 
-          const res = await authFetch('http://localhost:8000/api/v1/assessment/evaluate-subjective', {
+          const res = await authFetch('${API}/api/v1/assessment/evaluate-subjective', {
             method: 'POST',
             body: formData,
           });
@@ -3797,7 +3797,7 @@ export default function Home() {
         if (previousEmployers.length > 0) {
           formData.append('previous_employers', JSON.stringify(previousEmployers));
         }
-        const submitRes = await authFetch('http://localhost:8000/api/v1/assessment/submit-report', {
+        const submitRes = await authFetch('${API}/api/v1/assessment/submit-report', {
           method: 'POST',
           body: formData,
         });
@@ -4042,7 +4042,7 @@ export default function Home() {
                       className="ta-btn secondary"
                       style={{ padding: '10px 20px', fontWeight: 600, fontSize: 13.5, color: '#64748b' }}
                       onClick={() => {
-                        try { window.close(); } catch (e) {}
+                        try { window.close(); } catch (e) { }
                         setCandidateSessionClosed(true);
                       }}
                     >
@@ -4437,282 +4437,282 @@ export default function Home() {
                 </div>
               )}
 
-          {logoutMessage && (
-            <p className="ta-good ta-small" style={{ marginBottom: 12 }}>{logoutMessage}</p>
-          )}
-          {resetSuccess && (
-            <div style={{ background: '#e8f7ee', border: '1px solid #a3e6b9', color: '#177245', padding: '10px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>✓</span>
-              <span>{resetSuccess}</span>
-            </div>
-          )}
-          {authError && (
-            <div style={{ background: '#fee4e2', border: '1px solid #fca5a5', color: '#a1291f', padding: '10px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 15, flexShrink: 0 }}>⚠️</span>
-              <span>{authError}</span>
-            </div>
-          )}
-
-          {authMode === 'login' ? (
-            <>
-              <div className="ta-label">Email</div>
-              <input
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
-                placeholder="name@company.com"
-                className="ta-input"
-                style={{ marginBottom: 12 }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
-                <div className="ta-label" style={{ marginBottom: 0 }}>Password</div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode('forgot');
-                    setAuthError('');
-                    setLogoutMessage('');
-                    setResetSuccess('');
-                    setForgotEmail(loginEmail);
-                    setForgotNewPassword('');
-                    setForgotConfirmPassword('');
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    color: '#00a3e0',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    textDecoration: 'none'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-                >
-                  Forgot Password?
-                </button>
-              </div>
-              <div style={{ position: 'relative', marginBottom: 18 }}>
-                <input
-                  type={showLoginPassword ? 'text' : 'password'}
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
-                  placeholder="••••••••"
-                  className="ta-input"
-                  style={{ paddingRight: 38 }}
-                />
-                <span
-                  onClick={() => setShowLoginPassword((v) => !v)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
-                  title={showLoginPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showLoginPassword ? '🙈' : '👁'}
-                </span>
-              </div>
-              <button onClick={handleLogin} disabled={authLoading} className="ta-btn" style={{ width: '100%' }}>
-                {authLoading ? <><span className="ta-spinner"></span>Logging In...</> : 'Log In'}
-              </button>
-            </>
-          ) : authMode === 'register' ? (
-            <>
-              <div className="ta-label">Account Role</div>
-              <select
-                value={registerRole}
-                onChange={(e) => setRegisterRole(e.target.value as any)}
-                className="ta-select"
-                style={{ marginBottom: 12, fontWeight: 600 }}
-              >
-                <option value="account_manager">Account Manager</option>
-                <option value="admin">Admin</option>
-                <option value="hr">HR</option>
-                <option value="recruiter">Recruiter</option>
-              </select>
-
-              <div className="ta-label">Full Name</div>
-              <input
-                type="text"
-                value={registerFullName}
-                onChange={(e) => setRegisterFullName(e.target.value)}
-                placeholder="Jane Doe"
-                className="ta-input"
-                style={{ marginBottom: 12 }}
-              />
-              <div className="ta-label">Organization Name</div>
-              <input
-                type="text"
-                value={registerOrgName}
-                onChange={(e) => setRegisterOrgName(e.target.value)}
-                placeholder="e.g. Acme Corp"
-                className="ta-input"
-                style={{ marginBottom: 12 }}
-              />
-              <div className="ta-label">Email</div>
-              <input
-                type="email"
-                value={registerEmail}
-                onChange={(e) => setRegisterEmail(e.target.value)}
-                placeholder="name@company.com"
-                className="ta-input"
-                style={{ marginBottom: 12 }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <div className="ta-label" style={{ margin: 0 }}>Temporary Password (8 Characters)</div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-                    const lower = 'abcdefghijkmnopqrstuvwxyz';
-                    const digits = '23456789';
-                    const specials = '!@#$%&*?';
-                    const chosen = [
-                      upper[Math.floor(Math.random() * upper.length)],
-                      lower[Math.floor(Math.random() * lower.length)],
-                      digits[Math.floor(Math.random() * digits.length)],
-                      specials[Math.floor(Math.random() * specials.length)],
-                    ];
-                    const allPool = (upper + lower + digits + specials).split('').filter((c) => !chosen.includes(c));
-                    for (let i = 0; i < 4; i++) {
-                      const idx = Math.floor(Math.random() * allPool.length);
-                      chosen.push(allPool.splice(idx, 1)[0]);
-                    }
-                    chosen.sort(() => Math.random() - 0.5);
-                    setRegisterPassword(chosen.join(''));
-                    setShowRegisterPassword(true);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    color: '#00a3e0',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                  title="Generate unique 8-character password with alphabets, numbers & special characters"
-                >
-                  🎲 Auto-Generate (8 Chars)
-                </button>
-              </div>
-              <div style={{ position: 'relative', marginBottom: 14 }}>
-                <input
-                  type={showRegisterPassword ? 'text' : 'password'}
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleRegister(); }}
-                  placeholder="8 chars (alphabets, numbers, symbols) or leave blank"
-                  className="ta-input"
-                  style={{ paddingRight: 38 }}
-                />
-                <span
-                  onClick={() => setShowRegisterPassword((v) => !v)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
-                  title={showRegisterPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showRegisterPassword ? '🙈' : '👁'}
-                </span>
-              </div>
-              <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '9px 12px', fontSize: 12, color: '#0369a1', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 7 }}>
-                <span style={{ fontSize: 14, flexShrink: 0 }}>📧</span>
-                <span>An 8-character temporary password (unique combination of alphabets, numbers & special characters) will be emailed to the user. Upon initial login, they will be required to reset it.</span>
-              </div>
-              <button onClick={handleRegister} disabled={authLoading} className="ta-btn" style={{ width: '100%' }}>
-                {authLoading ? <><span className="ta-spinner"></span>Creating Account & Dispatching Email...</> : 'Create Account'}
-              </button>
-            </>
-          ) : (
-            <>
-              <div style={{ marginBottom: 16 }}>
-                <h3 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 700, color: '#111625' }}>Reset Password</h3>
-                <p className="ta-muted ta-small" style={{ margin: 0 }}>
-                  Enter your account email and specify a new password.
-                </p>
-              </div>
-
-              <div className="ta-label">Account Email</div>
-              <input
-                type="email"
-                value={forgotEmail}
-                onChange={(e) => setForgotEmail(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleForgotPassword(); }}
-                placeholder="name@company.com"
-                className="ta-input"
-                style={{ marginBottom: 12 }}
-              />
-
-              <div className="ta-label">New Password</div>
-              <div style={{ position: 'relative', marginBottom: 12 }}>
-                <input
-                  type={showForgotNewPw ? 'text' : 'password'}
-                  value={forgotNewPassword}
-                  onChange={(e) => setForgotNewPassword(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleForgotPassword(); }}
-                  placeholder="At least 8 characters"
-                  className="ta-input"
-                  style={{ paddingRight: 38 }}
-                />
-                <span
-                  onClick={() => setShowForgotNewPw((v) => !v)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
-                  title={showForgotNewPw ? 'Hide password' : 'Show password'}
-                >
-                  {showForgotNewPw ? '🙈' : '👁'}
-                </span>
-              </div>
-
-              <div className="ta-label">Confirm New Password</div>
-              <div style={{ position: 'relative', marginBottom: 12 }}>
-                <input
-                  type={showForgotConfirmPw ? 'text' : 'password'}
-                  value={forgotConfirmPassword}
-                  onChange={(e) => setForgotConfirmPassword(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleForgotPassword(); }}
-                  placeholder="Re-enter new password"
-                  className="ta-input"
-                  style={{ paddingRight: 38 }}
-                />
-                <span
-                  onClick={() => setShowForgotConfirmPw((v) => !v)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
-                  title={showForgotConfirmPw ? 'Hide password' : 'Show password'}
-                >
-                  {showForgotConfirmPw ? '🙈' : '👁'}
-                </span>
-              </div>
-
-              {/* Password checks helper */}
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 12px', marginBottom: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: forgotNewPassword.length >= 8 ? '#1f8f5f' : '#64748b', marginBottom: 4 }}>
-                  <span style={{ fontWeight: 700 }}>{forgotNewPassword.length >= 8 ? '✓' : '○'}</span>
-                  <span>Minimum 8 characters</span>
+              {logoutMessage && (
+                <p className="ta-good ta-small" style={{ marginBottom: 12 }}>{logoutMessage}</p>
+              )}
+              {resetSuccess && (
+                <div style={{ background: '#e8f7ee', border: '1px solid #a3e6b9', color: '#177245', padding: '10px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>✓</span>
+                  <span>{resetSuccess}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: forgotNewPassword && forgotNewPassword === forgotConfirmPassword ? '#1f8f5f' : '#64748b' }}>
-                  <span style={{ fontWeight: 700 }}>{forgotNewPassword && forgotNewPassword === forgotConfirmPassword ? '✓' : '○'}</span>
-                  <span>Passwords match</span>
+              )}
+              {authError && (
+                <div style={{ background: '#fee4e2', border: '1px solid #fca5a5', color: '#a1291f', padding: '10px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 15, flexShrink: 0 }}>⚠️</span>
+                  <span>{authError}</span>
                 </div>
-              </div>
+              )}
 
-              <button
-                onClick={handleForgotPassword}
-                disabled={authLoading}
-                className="ta-btn"
-                style={{ width: '100%', marginBottom: 10 }}
-              >
-                {authLoading ? <><span className="ta-spinner"></span>Resetting Password...</> : 'Reset Password'}
-              </button>
+              {authMode === 'login' ? (
+                <>
+                  <div className="ta-label">Email</div>
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
+                    placeholder="name@company.com"
+                    className="ta-input"
+                    style={{ marginBottom: 12 }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
+                    <div className="ta-label" style={{ marginBottom: 0 }}>Password</div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('forgot');
+                        setAuthError('');
+                        setLogoutMessage('');
+                        setResetSuccess('');
+                        setForgotEmail(loginEmail);
+                        setForgotNewPassword('');
+                        setForgotConfirmPassword('');
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        color: '#00a3e0',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textDecoration: 'none'
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                      onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                  <div style={{ position: 'relative', marginBottom: 18 }}>
+                    <input
+                      type={showLoginPassword ? 'text' : 'password'}
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
+                      placeholder="••••••••"
+                      className="ta-input"
+                      style={{ paddingRight: 38 }}
+                    />
+                    <span
+                      onClick={() => setShowLoginPassword((v) => !v)}
+                      style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
+                      title={showLoginPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showLoginPassword ? '🙈' : '👁'}
+                    </span>
+                  </div>
+                  <button onClick={handleLogin} disabled={authLoading} className="ta-btn" style={{ width: '100%' }}>
+                    {authLoading ? <><span className="ta-spinner"></span>Logging In...</> : 'Log In'}
+                  </button>
+                </>
+              ) : authMode === 'register' ? (
+                <>
+                  <div className="ta-label">Account Role</div>
+                  <select
+                    value={registerRole}
+                    onChange={(e) => setRegisterRole(e.target.value as any)}
+                    className="ta-select"
+                    style={{ marginBottom: 12, fontWeight: 600 }}
+                  >
+                    <option value="account_manager">Account Manager</option>
+                    <option value="admin">Admin</option>
+                    <option value="hr">HR</option>
+                    <option value="recruiter">Recruiter</option>
+                  </select>
 
-              <button
-                type="button"
-                onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                className="ta-btn secondary"
-                style={{ width: '100%' }}
-              >
-                Cancel & Return to Log In
-              </button>
-            </>
-          )}
+                  <div className="ta-label">Full Name</div>
+                  <input
+                    type="text"
+                    value={registerFullName}
+                    onChange={(e) => setRegisterFullName(e.target.value)}
+                    placeholder="Jane Doe"
+                    className="ta-input"
+                    style={{ marginBottom: 12 }}
+                  />
+                  <div className="ta-label">Organization Name</div>
+                  <input
+                    type="text"
+                    value={registerOrgName}
+                    onChange={(e) => setRegisterOrgName(e.target.value)}
+                    placeholder="e.g. Acme Corp"
+                    className="ta-input"
+                    style={{ marginBottom: 12 }}
+                  />
+                  <div className="ta-label">Email</div>
+                  <input
+                    type="email"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="ta-input"
+                    style={{ marginBottom: 12 }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <div className="ta-label" style={{ margin: 0 }}>Temporary Password (8 Characters)</div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+                        const lower = 'abcdefghijkmnopqrstuvwxyz';
+                        const digits = '23456789';
+                        const specials = '!@#$%&*?';
+                        const chosen = [
+                          upper[Math.floor(Math.random() * upper.length)],
+                          lower[Math.floor(Math.random() * lower.length)],
+                          digits[Math.floor(Math.random() * digits.length)],
+                          specials[Math.floor(Math.random() * specials.length)],
+                        ];
+                        const allPool = (upper + lower + digits + specials).split('').filter((c) => !chosen.includes(c));
+                        for (let i = 0; i < 4; i++) {
+                          const idx = Math.floor(Math.random() * allPool.length);
+                          chosen.push(allPool.splice(idx, 1)[0]);
+                        }
+                        chosen.sort(() => Math.random() - 0.5);
+                        setRegisterPassword(chosen.join(''));
+                        setShowRegisterPassword(true);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        color: '#00a3e0',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                      title="Generate unique 8-character password with alphabets, numbers & special characters"
+                    >
+                      🎲 Auto-Generate (8 Chars)
+                    </button>
+                  </div>
+                  <div style={{ position: 'relative', marginBottom: 14 }}>
+                    <input
+                      type={showRegisterPassword ? 'text' : 'password'}
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleRegister(); }}
+                      placeholder="8 chars (alphabets, numbers, symbols) or leave blank"
+                      className="ta-input"
+                      style={{ paddingRight: 38 }}
+                    />
+                    <span
+                      onClick={() => setShowRegisterPassword((v) => !v)}
+                      style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
+                      title={showRegisterPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showRegisterPassword ? '🙈' : '👁'}
+                    </span>
+                  </div>
+                  <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '9px 12px', fontSize: 12, color: '#0369a1', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 7 }}>
+                    <span style={{ fontSize: 14, flexShrink: 0 }}>📧</span>
+                    <span>An 8-character temporary password (unique combination of alphabets, numbers & special characters) will be emailed to the user. Upon initial login, they will be required to reset it.</span>
+                  </div>
+                  <button onClick={handleRegister} disabled={authLoading} className="ta-btn" style={{ width: '100%' }}>
+                    {authLoading ? <><span className="ta-spinner"></span>Creating Account & Dispatching Email...</> : 'Create Account'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 700, color: '#111625' }}>Reset Password</h3>
+                    <p className="ta-muted ta-small" style={{ margin: 0 }}>
+                      Enter your account email and specify a new password.
+                    </p>
+                  </div>
+
+                  <div className="ta-label">Account Email</div>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleForgotPassword(); }}
+                    placeholder="name@company.com"
+                    className="ta-input"
+                    style={{ marginBottom: 12 }}
+                  />
+
+                  <div className="ta-label">New Password</div>
+                  <div style={{ position: 'relative', marginBottom: 12 }}>
+                    <input
+                      type={showForgotNewPw ? 'text' : 'password'}
+                      value={forgotNewPassword}
+                      onChange={(e) => setForgotNewPassword(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleForgotPassword(); }}
+                      placeholder="At least 8 characters"
+                      className="ta-input"
+                      style={{ paddingRight: 38 }}
+                    />
+                    <span
+                      onClick={() => setShowForgotNewPw((v) => !v)}
+                      style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
+                      title={showForgotNewPw ? 'Hide password' : 'Show password'}
+                    >
+                      {showForgotNewPw ? '🙈' : '👁'}
+                    </span>
+                  </div>
+
+                  <div className="ta-label">Confirm New Password</div>
+                  <div style={{ position: 'relative', marginBottom: 12 }}>
+                    <input
+                      type={showForgotConfirmPw ? 'text' : 'password'}
+                      value={forgotConfirmPassword}
+                      onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleForgotPassword(); }}
+                      placeholder="Re-enter new password"
+                      className="ta-input"
+                      style={{ paddingRight: 38 }}
+                    />
+                    <span
+                      onClick={() => setShowForgotConfirmPw((v) => !v)}
+                      style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 15, userSelect: 'none', opacity: 0.65 }}
+                      title={showForgotConfirmPw ? 'Hide password' : 'Show password'}
+                    >
+                      {showForgotConfirmPw ? '🙈' : '👁'}
+                    </span>
+                  </div>
+
+                  {/* Password checks helper */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 12px', marginBottom: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: forgotNewPassword.length >= 8 ? '#1f8f5f' : '#64748b', marginBottom: 4 }}>
+                      <span style={{ fontWeight: 700 }}>{forgotNewPassword.length >= 8 ? '✓' : '○'}</span>
+                      <span>Minimum 8 characters</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: forgotNewPassword && forgotNewPassword === forgotConfirmPassword ? '#1f8f5f' : '#64748b' }}>
+                      <span style={{ fontWeight: 700 }}>{forgotNewPassword && forgotNewPassword === forgotConfirmPassword ? '✓' : '○'}</span>
+                      <span>Passwords match</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleForgotPassword}
+                    disabled={authLoading}
+                    className="ta-btn"
+                    style={{ width: '100%', marginBottom: 10 }}
+                  >
+                    {authLoading ? <><span className="ta-spinner"></span>Resetting Password...</> : 'Reset Password'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode('login'); setAuthError(''); }}
+                    className="ta-btn secondary"
+                    style={{ width: '100%' }}
+                  >
+                    Cancel & Return to Log In
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
@@ -5112,22 +5112,22 @@ export default function Home() {
                     userRole === 'admin'
                       ? '#fee2e2'
                       : userRole === 'hr'
-                      ? '#e0e7ff'
-                      : userRole === 'account_manager'
-                      ? '#fef3c7'
-                      : userRole === 'candidate'
-                      ? '#d1fae5'
-                      : '#e0f2fe',
+                        ? '#e0e7ff'
+                        : userRole === 'account_manager'
+                          ? '#fef3c7'
+                          : userRole === 'candidate'
+                            ? '#d1fae5'
+                            : '#e0f2fe',
                   color:
                     userRole === 'admin'
                       ? '#991b1b'
                       : userRole === 'hr'
-                      ? '#3730a3'
-                      : userRole === 'account_manager'
-                      ? '#92400e'
-                      : userRole === 'candidate'
-                      ? '#065f46'
-                      : '#075985',
+                        ? '#3730a3'
+                        : userRole === 'account_manager'
+                          ? '#92400e'
+                          : userRole === 'candidate'
+                            ? '#065f46'
+                            : '#075985',
                   border: 'none',
                   fontWeight: 700,
                   fontSize: 11,
