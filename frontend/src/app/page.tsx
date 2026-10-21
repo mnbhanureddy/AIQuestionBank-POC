@@ -306,7 +306,7 @@ export default function Home() {
       setAuthChecked(true);
       return;
     }
-    fetch('${API}/api/v1/auth/me', {
+    fetch(`${API}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${saved}` },
     })
       .then((res) => {
@@ -351,7 +351,7 @@ export default function Home() {
       formData.append('username', loginEmail.trim()); // OAuth2PasswordRequestForm spec uses "username" for the email
       formData.append('password', loginPassword);
 
-      const res = await fetch('${API}/api/v1/auth/login', {
+      const res = await fetch(`${API}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
@@ -399,7 +399,7 @@ export default function Home() {
       formData.append('username', candidateLoginEmail.trim());
       formData.append('password', candidateLoginPassword);
 
-      const res = await fetch('${API}/api/v1/auth/login', {
+      const res = await fetch(`${API}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
@@ -434,7 +434,7 @@ export default function Home() {
 
     setAuthLoading(true);
     try {
-      const res = await fetch('${API}/api/v1/auth/register-candidate', {
+      const res = await fetch(`${API}/api/v1/auth/register-candidate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -467,7 +467,7 @@ export default function Home() {
     if (!token) return;
     setLoadingMyAssessments(true);
     try {
-      const res = await fetch('${API}/api/v1/candidate/my-assessments', {
+      const res = await fetch(`${API}/api/v1/candidate/my-assessments`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -485,7 +485,7 @@ export default function Home() {
     if (!token) return;
     setLoadingMyReports(true);
     try {
-      const res = await fetch('${API}/api/v1/candidate/my-reports', {
+      const res = await fetch(`${API}/api/v1/candidate/my-reports`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -554,7 +554,7 @@ export default function Home() {
       if (registerFullName) formData.append('full_name', registerFullName);
       if (registerOrgName) formData.append('organization_name', registerOrgName);
 
-      const res = await fetch('${API}/api/v1/auth/register', {
+      const res = await fetch(`${API}/api/v1/auth/register`, {
         method: 'POST',
         body: formData,
       });
@@ -618,7 +618,7 @@ export default function Home() {
       formData.append('email', email);
       formData.append('new_password', forgotNewPassword);
 
-      const res = await fetch('${API}/api/v1/auth/forgot-password', {
+      const res = await fetch(`${API}/api/v1/auth/forgot-password`, {
         method: 'POST',
         body: formData,
       });
@@ -700,7 +700,7 @@ export default function Home() {
       formData.append('full_name', profileFullName);
       formData.append('organization_name', profileOrgName);
 
-      const res = await authFetch('${API}/api/v1/auth/me', {
+      const res = await authFetch(`${API}/api/v1/auth/me`, {
         method: 'PUT',
         body: formData,
       });
@@ -785,7 +785,7 @@ export default function Home() {
       formData.append('current_password', currentPassword);
       formData.append('new_password', newPassword);
 
-      const res = await authFetch('${API}/api/v1/auth/change-password', {
+      const res = await authFetch(`${API}/api/v1/auth/change-password`, {
         method: 'POST',
         body: formData,
       });
@@ -1000,7 +1000,7 @@ export default function Home() {
       formData.append('report_id', String(reportId));
       formData.append('is_onboarded', String(!currentStatus));
 
-      const res = await authFetch('${API}/api/v1/assessment/toggle-onboard', {
+      const res = await authFetch(`${API}/api/v1/assessment/toggle-onboard`, {
         method: 'POST',
         body: formData,
       });
@@ -1059,7 +1059,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append('new_password', resetTempPassword);
 
-      const res = await authFetch('${API}/api/v1/auth/reset-temporary-password', {
+      const res = await authFetch(`${API}/api/v1/auth/reset-temporary-password`, {
         method: 'POST',
         body: formData,
       });
@@ -1412,7 +1412,7 @@ export default function Home() {
       const targetSourceId = srcId !== undefined ? srcId : sourceId;
       const url = targetSourceId
         ? `${API}/api/v1/dimensions-skills?source_id=${targetSourceId}`
-        : '${API}/api/v1/dimensions-skills';
+        : `${API}/api/v1/dimensions-skills`;
       const res = await authFetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -1438,7 +1438,7 @@ export default function Home() {
         dimensions: matrixDimensions,
         source_material_id: sourceId,
       };
-      const res = await authFetch('${API}/api/v1/dimensions-skills', {
+      const res = await authFetch(`${API}/api/v1/dimensions-skills`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -1458,7 +1458,7 @@ export default function Home() {
   const handleFetchTemplates = async () => {
     setLoadingTemplates(true);
     try {
-      const res = await authFetch('${API}/api/v1/dimensions-skills/templates');
+      const res = await authFetch(`${API}/api/v1/dimensions-skills/templates`);
       if (res.ok) {
         const data = await res.json();
         setAvailableTemplates(data.templates || []);
@@ -1597,7 +1597,7 @@ export default function Home() {
       };
       const url = editingTemplateId
         ? `${API}/api/v1/dimensions-skills/templates/${editingTemplateId}`
-        : '${API}/api/v1/dimensions-skills/templates';
+        : `${API}/api/v1/dimensions-skills/templates`;
       const method = editingTemplateId ? 'PUT' : 'POST';
 
       const res = await authFetch(url, {
@@ -1660,7 +1660,7 @@ export default function Home() {
         description: saveAsTplDesc.trim(),
         dimensions: matrixDimensions,
       };
-      const res = await authFetch('${API}/api/v1/dimensions-skills/templates', {
+      const res = await authFetch(`${API}/api/v1/dimensions-skills/templates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -1752,7 +1752,7 @@ export default function Home() {
         role_title: aiExtractRoleInput || skillMatrixRoleTitle || topic || '',
         source_id: sourceId,
       };
-      const res = await authFetch('${API}/api/v1/dimensions-skills/ai-extract', {
+      const res = await authFetch(`${API}/api/v1/dimensions-skills/ai-extract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -2138,7 +2138,7 @@ export default function Home() {
     if (!token) return;
     setLoadingReports(true);
     try {
-      const res = await authFetch('${API}/api/v1/reports');
+      const res = await authFetch(`${API}/api/v1/reports`);
       if (!res.ok) {
         if (res.status === 401) return;
         throw new Error('Failed to load past reports.');
@@ -2508,7 +2508,7 @@ export default function Home() {
     try {
       const url = srcId
         ? `${API}/api/v1/job-match/latest?source_id=${srcId}`
-        : '${API}/api/v1/job-match/latest';
+        : `${API}/api/v1/job-match/latest`;
       const res = await authFetch(url);
       if (!res.ok) return;
       const data = await res.json();
@@ -2538,7 +2538,7 @@ export default function Home() {
     if (!token) return;
     setLoadingInvitations(true);
     try {
-      const res = await authFetch('${API}/api/v1/assessment/invitations');
+      const res = await authFetch(`${API}/api/v1/assessment/invitations`);
       if (!res.ok) return;
       const data = await res.json();
       setInvitations(Array.isArray(data) ? data : []);
@@ -2555,7 +2555,7 @@ export default function Home() {
     if (!token) return;
     setLoadingNotifications(true);
     try {
-      const res = await authFetch('${API}/api/v1/notifications');
+      const res = await authFetch(`${API}/api/v1/notifications`);
       if (!res.ok) return;
       const data = await res.json();
       const notifs: RecruiterNotificationItem[] = Array.isArray(data.notifications) ? data.notifications : [];
@@ -2607,7 +2607,7 @@ export default function Home() {
 
   const handleMarkAllNotificationsRead = async () => {
     try {
-      const res = await authFetch('${API}/api/v1/notifications/mark-all-read', {
+      const res = await authFetch(`${API}/api/v1/notifications/mark-all-read`, {
         method: 'POST',
       });
       if (res.ok) {
@@ -2667,7 +2667,7 @@ export default function Home() {
         headers['Authorization'] = `Bearer ${savedToken}`;
       }
 
-      const res = await fetch('${API}/api/v1/assessment/submit-candidate-assessment', {
+      const res = await fetch(`${API}/api/v1/assessment/submit-candidate-assessment`, {
         method: 'POST',
         headers,
         body: formData,
@@ -2925,7 +2925,7 @@ export default function Home() {
       formData.append('candidates', JSON.stringify(candidatePayload));
       formData.append('duration_minutes', durationMinutes.toString());
 
-      const res = await authFetch('${API}/api/v1/assessment/invite-candidates', {
+      const res = await authFetch(`${API}/api/v1/assessment/invite-candidates`, {
         method: 'POST',
         body: formData,
       });
@@ -3006,7 +3006,7 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append('invitation_id', invitationId.toString());
-      const res = await authFetch('${API}/api/v1/assessment/resend-invitation', {
+      const res = await authFetch(`${API}/api/v1/assessment/resend-invitation`, {
         method: 'POST',
         body: formData,
       });
@@ -3216,7 +3216,7 @@ export default function Home() {
         formData.append('file', file);
         formData.append('organization_name', organizationName);
 
-        const res = await authFetch('${API}/api/v1/content/upload', {
+        const res = await authFetch(`${API}/api/v1/content/upload`, {
           method: 'POST',
           body: formData,
         });
@@ -3245,7 +3245,7 @@ export default function Home() {
         const formData = new FormData();
         formData.append('topic', topic);
         formData.append('organization_name', organizationName);
-        const res = await authFetch('${API}/api/v1/content/topic', {
+        const res = await authFetch(`${API}/api/v1/content/topic`, {
           method: 'POST',
           body: formData,
         });
@@ -3302,7 +3302,7 @@ export default function Home() {
         formData.append('source_id', sourceId.toString());
         resumeFiles.forEach((f) => formData.append('files', f));
 
-        const res = await authFetch('${API}/api/v1/candidate/resume/upload-multiple', {
+        const res = await authFetch(`${API}/api/v1/candidate/resume/upload-multiple`, {
           method: 'POST',
           body: formData,
         });
@@ -3322,7 +3322,7 @@ export default function Home() {
         formData.append('source_id', sourceId.toString());
         if (candidateName) formData.append('candidate_name', candidateName);
 
-        const res = await authFetch('${API}/api/v1/candidate/resume/upload', {
+        const res = await authFetch(`${API}/api/v1/candidate/resume/upload`, {
           method: 'POST',
           body: formData,
         });
@@ -3337,7 +3337,7 @@ export default function Home() {
         formData.append('source_id', sourceId.toString());
         if (candidateName) formData.append('candidate_name', candidateName);
 
-        const res = await authFetch('${API}/api/v1/candidate/resume/text', {
+        const res = await authFetch(`${API}/api/v1/candidate/resume/text`, {
           method: 'POST',
           body: formData,
         });
@@ -3375,7 +3375,7 @@ export default function Home() {
       formData.append('source_id', sourceId.toString());
       formData.append('resume_ids', JSON.stringify(targetIds));
 
-      const res = await authFetch('${API}/api/v1/job-match/analyze-batch', {
+      const res = await authFetch(`${API}/api/v1/job-match/analyze-batch`, {
         method: 'POST',
         body: formData,
       });
@@ -3485,7 +3485,7 @@ export default function Home() {
         formData.append('question_type', questionType);
         if (sourceId !== null) formData.append('source_id', sourceId.toString());
 
-        const res = await authFetch('${API}/api/v1/questions/generate', {
+        const res = await authFetch(`${API}/api/v1/questions/generate`, {
           method: 'POST',
           body: formData,
         });
@@ -3665,7 +3665,7 @@ export default function Home() {
       formData.append('question_type', questionType);
       if (sourceId !== null) formData.append('source_id', sourceId.toString());
 
-      const res = await authFetch('${API}/api/v1/questions/generate', {
+      const res = await authFetch(`${API}/api/v1/questions/generate`, {
         method: 'POST',
         body: formData,
       });
@@ -3695,7 +3695,7 @@ export default function Home() {
       inviteFormData.append('candidates', JSON.stringify(targetCandidates));
       inviteFormData.append('duration_minutes', durationMinutes.toString());
 
-      const inviteRes = await authFetch('${API}/api/v1/assessment/invite-candidates', {
+      const inviteRes = await authFetch(`${API}/api/v1/assessment/invite-candidates`, {
         method: 'POST',
         body: inviteFormData,
       });
@@ -3754,7 +3754,7 @@ export default function Home() {
           formData.append('user_answer', answer);
           formData.append('max_marks', '10');
 
-          const res = await authFetch('${API}/api/v1/assessment/evaluate-subjective', {
+          const res = await authFetch(`${API}/api/v1/assessment/evaluate-subjective`, {
             method: 'POST',
             body: formData,
           });
@@ -3797,7 +3797,7 @@ export default function Home() {
         if (previousEmployers.length > 0) {
           formData.append('previous_employers', JSON.stringify(previousEmployers));
         }
-        const submitRes = await authFetch('${API}/api/v1/assessment/submit-report', {
+        const submitRes = await authFetch(`${API}/api/v1/assessment/submit-report`, {
           method: 'POST',
           body: formData,
         });
