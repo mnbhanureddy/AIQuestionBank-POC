@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-const API = process.env.NEXT_PUBLIC_API ?? 'https://talentassessmentai.onrender.com/';
+const API = (process.env.NEXT_PUBLIC_API ?? 'https://aiquestionbank-poc.onrender.com').replace(/\/+$/, '');
 interface Question {
   question_type: string;
   question_text: string;
