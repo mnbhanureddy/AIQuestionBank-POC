@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-const API = process.env.NEXT_PUBLIC_API ?? 'http://localhost:8000';
+const API = process.env.NEXT_PUBLIC_API ?? 'https://talentassessmentai.onrender.com/';
 interface Question {
   question_type: string;
   question_text: string;
