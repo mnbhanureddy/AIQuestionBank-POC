@@ -726,11 +726,12 @@ TalentAssess AI Notification System
         user_name: str,
         role: str,
         temporary_password: str,
-        organization_name: str = "TalentAssess AI"
+        organization_name: str = "TalentAssess AI",
+        must_reset_password: bool = True
     ) -> Tuple[bool, str]:
         """
-        Sends an automated welcome email with account credentials, temporary password,
-        and instructions to reset password on first login.
+        Sends an automated welcome email with account credentials, password,
+        and instructions (including password reset if it was a temporary password).
         """
         config = EmailService.get_smtp_config()
 
@@ -749,7 +750,36 @@ TalentAssess AI Notification System
                 "recruiter": "Recruiter"
             }.get(role.lower(), role.title())
 
-            subject = f"🔐 Your TalentAssess AI Account & Temporary Password ({role_display})"
+            if must_reset_password:
+                subject = f"🔐 Your TalentAssess AI Account & Temporary Password ({role_display})"
+                password_label = "Temporary Password"
+                text_action = f"""MANDATORY FIRST-TIME ACTION:
+For account security, your temporary password must be reset upon first login.
+1. Open the portal: {frontend_url}
+2. Enter your email ({user_email}) and temporary password.
+3. You will be prompted immediately to set a permanent secure password."""
+                html_notice = f"""<div style="background-color:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:14px 18px; margin-bottom:28px;">
+                <div style="font-weight:700; color:#b45309; font-size:13.5px; margin-bottom:4px;">
+                  ⚠️ Mandatory First-Time Action: Password Reset
+                </div>
+                <div style="font-size:13px; color:#92400e; line-height:1.5;">
+                  For security, your temporary password must be reset immediately upon your first login. You will be prompted to choose a permanent secure password.
+                </div>
+              </div>"""
+            else:
+                subject = f"🔐 Welcome to TalentAssess AI ({role_display})"
+                password_label = "Account Password"
+                text_action = f"""ACCOUNT READY:
+You can log in directly to your portal using the credentials above:
+{frontend_url}"""
+                html_notice = f"""<div style="background-color:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:14px 18px; margin-bottom:28px;">
+                <div style="font-weight:700; color:#166534; font-size:13.5px; margin-bottom:4px;">
+                  ✓ Account Ready to Access
+                </div>
+                <div style="font-size:13px; color:#15803d; line-height:1.5;">
+                  You can log in directly using the password configured during registration.
+                </div>
+              </div>"""
 
             text_body = f"""Dear {user_name or 'User'},
 
@@ -759,13 +789,9 @@ ACCOUNT CREDENTIALS:
 • Portal URL: {frontend_url}
 • Login Email: {user_email}
 • Assigned Role: {role_display}
-• Temporary Password: {temporary_password}
+• {password_label}: {temporary_password}
 
-MANDATORY FIRST-TIME ACTION:
-For account security, your temporary password must be reset upon first login.
-1. Open the portal: {frontend_url}
-2. Enter your email ({user_email}) and temporary password.
-3. You will be prompted immediately to set a permanent secure password.
+{text_action}
 
 Best regards,
 TalentAssess AI Administration Team
@@ -809,7 +835,7 @@ TalentAssess AI Administration Team
               </h2>
 
               <p style="margin:0 0 22px; font-size:14.5px; line-height:1.6; color:#475569;">
-                An account has been created for you on <strong>TalentAssess AI</strong> with the <strong>{role_display}</strong> role. Use the temporary credentials below to log in.
+                An account has been created for you on <strong>TalentAssess AI</strong> with the <strong>{role_display}</strong> role. Use the credentials below to log in.
               </p>
 
               <!-- Credentials Card -->
@@ -835,9 +861,9 @@ TalentAssess AI Administration Team
                       </tr>
                       <tr>
                         <td style="padding:6px 0; font-size:13.5px; color:#64748b;">
-                          🔑 <strong>Temporary Password:</strong>
+                          🔑 <strong>{password_label}:</strong>
                         </td>
-                        <td style="padding:6px 0; font-size:15px; font-weight:800; color:#dc2626; font-family:Consolas, monospace; letter-spacing:0.5px;">
+                        <td style="padding:6px 0; font-size:15px; font-weight:800; color:#0284c7; font-family:Consolas, monospace; letter-spacing:0.5px;">
                           {temporary_password}
                         </td>
                       </tr>
@@ -847,14 +873,7 @@ TalentAssess AI Administration Team
               </table>
 
               <!-- Notice Box -->
-              <div style="background-color:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:14px 18px; margin-bottom:28px;">
-                <div style="font-weight:700; color:#b45309; font-size:13.5px; margin-bottom:4px;">
-                  ⚠️ Mandatory First-Time Action: Password Reset
-                </div>
-                <div style="font-size:13px; color:#92400e; line-height:1.5;">
-                  For security, your temporary password must be reset immediately upon your first login. You will be prompted to choose a permanent secure password.
-                </div>
-              </div>
+              {html_notice}
 
               <!-- Action Button -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">

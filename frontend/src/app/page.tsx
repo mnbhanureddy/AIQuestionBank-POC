@@ -541,8 +541,8 @@ export default function Home() {
     setLogoutMessage('');
     setResetSuccess('');
     if (!registerEmail.trim()) return setAuthError('Please enter your email.');
-    if (registerPassword && registerPassword.length < 8) {
-      return setAuthError('Password must be at least 8 characters if specified.');
+    if (registerPassword && registerPassword.length < 6) {
+      return setAuthError('Password must be at least 6 characters if specified.');
     }
 
     setAuthLoading(true);
@@ -4559,7 +4559,7 @@ export default function Home() {
                     style={{ marginBottom: 12 }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <div className="ta-label" style={{ margin: 0 }}>Temporary Password (8 Characters)</div>
+                    <div className="ta-label" style={{ margin: 0 }}>Password (optional, min 6 characters)</div>
                     <button
                       type="button"
                       onClick={() => {
@@ -4602,7 +4602,7 @@ export default function Home() {
                       value={registerPassword}
                       onChange={(e) => setRegisterPassword(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleRegister(); }}
-                      placeholder="8 chars (alphabets, numbers, symbols) or leave blank"
+                      placeholder="Enter password or leave blank to auto-generate"
                       className="ta-input"
                       style={{ paddingRight: 38 }}
                     />

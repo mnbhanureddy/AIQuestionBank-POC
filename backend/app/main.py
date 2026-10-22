@@ -175,26 +175,24 @@ def register(
         clean_role = "recruiter"
 
     raw_pw = password.strip() if password else ""
-    if (
-        raw_pw
-        and len(raw_pw) == 8
-        and any(c in string.ascii_uppercase for c in raw_pw)
-        and any(c in string.ascii_lowercase for c in raw_pw)
-        and any(c in string.digits for c in raw_pw)
-        and any(c in "!@#$%&*?" for c in raw_pw)
-        and len(set(raw_pw)) == 8
-    ):
-        temp_password = raw_pw
+    if raw_pw:
+        if len(raw_pw) < 6:
+            raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+        final_password = raw_pw
+        must_reset = False
+        temp_pwd_response = None
     else:
-        temp_password = generate_temporary_password(8)
+        final_password = generate_temporary_password(8)
+        must_reset = True
+        temp_pwd_response = final_password
 
     user = models.User(
         email=clean_email,
-        hashed_password=hash_password(temp_password),
+        hashed_password=hash_password(final_password),
         full_name=full_name.strip() if full_name else None,
         organization_name=organization_name.strip() if organization_name else None,
         role=clean_role,
-        must_reset_password=True
+        must_reset_password=must_reset
     )
     db.add(user)
     db.commit()
@@ -208,8 +206,9 @@ def register(
             user_email=user.email,
             user_name=user.full_name or user.email,
             role=user.role,
-            temporary_password=temp_password,
-            organization_name=user.organization_name or "TalentAssess AI"
+            temporary_password=final_password,
+            organization_name=user.organization_name or "TalentAssess AI",
+            must_reset_password=must_reset
         )
         if not email_sent:
             print(f"Warning: Account creation email was not sent: {email_err}")
@@ -220,8 +219,8 @@ def register(
     return {
         "access_token": token,
         "token_type": "bearer",
-        "temporary_password": temp_password,
-        "must_reset_password": True,
+        "temporary_password": temp_pwd_response,
+        "must_reset_password": must_reset,
         "email_sent": email_sent,
         "user": {
             "id": user.id,
@@ -229,7 +228,7 @@ def register(
             "full_name": user.full_name,
             "organization_name": user.organization_name,
             "role": user.role,
-            "must_reset_password": True
+            "must_reset_password": must_reset
         },
     }
 
