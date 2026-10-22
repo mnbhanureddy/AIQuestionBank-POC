@@ -67,7 +67,17 @@ def _check_source_ownership(source_record: models.SourceMaterial, current_user: 
     """Raise 403 if this source material belongs to a different user.
     Rows with no owner (user_id is None) are legacy/pre-auth data and are
     left accessible rather than orphaned."""
+    if not source_record:
+        return
+    if getattr(current_user, "role", "recruiter") in ["admin", "hr", "account_manager"]:
+        return
     if source_record.user_id is not None and source_record.user_id != current_user.id:
+        if (
+            source_record.organization_name
+            and current_user.organization_name
+            and source_record.organization_name.strip().lower() == current_user.organization_name.strip().lower()
+        ):
+            return
         raise HTTPException(status_code=403, detail="You don't have access to this source material.")
 
 
@@ -1379,6 +1389,13 @@ def submit_report(
 
     for staff in target_staff:
         try:
+            existing_notif = db.query(models.RecruiterNotification).filter(
+                models.RecruiterNotification.user_id == staff.id,
+                models.RecruiterNotification.report_id == record.id
+            ).first()
+            if existing_notif:
+                continue
+
             notif = models.RecruiterNotification(
                 user_id=staff.id,
                 invitation_id=invitation.id if invitation else None,
@@ -1939,6 +1956,13 @@ def submit_candidate_assessment(
     # 2. Record in-app recruiter notifications for all staff members
     for staff in target_staff:
         try:
+            existing_notif = db.query(models.RecruiterNotification).filter(
+                models.RecruiterNotification.user_id == staff.id,
+                models.RecruiterNotification.report_id == report.id
+            ).first()
+            if existing_notif:
+                continue
+
             notif = models.RecruiterNotification(
                 user_id=staff.id,
                 invitation_id=invitation.id,
@@ -2007,6 +2031,8 @@ def submit_candidate_assessment(
         "status": "success",
         "message": "Assessment submitted and evaluated successfully!",
         "report_id": report.id,
+        "evaluation_report_id": report.id,
+        "invitation_token": invitation.invitation_token,
         "candidate_name": invitation.candidate_name,
         "total_score": total_score,
         "max_score": max_score,
@@ -2268,6 +2294,7 @@ def list_assessment_invitations(
             "created_at": inv.created_at.isoformat() if inv.created_at else None,
             "submitted_at": inv.submitted_at.isoformat() if inv.submitted_at else None,
             "report_id": inv.evaluation_report_id,
+            "evaluation_report_id": inv.evaluation_report_id,
             "is_onboarded": bool(inv.is_onboarded),
             "onboarded_at": inv.onboarded_at.isoformat() if inv.onboarded_at else None,
             "job_title": sm.filename or sm.role_or_topic or "Job Role" if sm else "Job Role",
@@ -2304,19 +2331,27 @@ def get_notifications(
     )
 
     # For recruiters/admins/HR: if this specific user has no notifications assigned,
-    # fallback to all system notifications so team members see submissions
+    # fallback to unassigned (user_id is None) system notifications
     if not notifs and current_user.role in ["recruiter", "admin", "hr", "account_manager"]:
         notifs = (
             db.query(models.RecruiterNotification)
+            .filter(models.RecruiterNotification.user_id.is_(None))
             .order_by(desc(models.RecruiterNotification.created_at))
             .limit(100)
             .all()
         )
 
-    unread_count = sum(1 for n in notifs if not n.is_read)
-
+    # Strict deduplication: exactly 1 notification per evaluation report
+    seen_report_ids = set()
     items = []
+    unread_count = 0
     for n in notifs:
+        key = n.report_id if n.report_id else f"notif_{n.id}"
+        if key in seen_report_ids:
+            continue
+        seen_report_ids.add(key)
+        if not n.is_read:
+            unread_count += 1
         items.append({
             "id": n.id,
             "invitation_id": n.invitation_id,
@@ -2345,23 +2380,37 @@ def get_unread_notification_count(
     db: Session = Depends(get_db)
 ):
     """
-    Lightweight endpoint for polling unread notification count.
+    Lightweight endpoint for polling unread notification count with deduplication.
     """
-    unread_count = (
+    unread_notifs = (
         db.query(models.RecruiterNotification)
         .filter(
             models.RecruiterNotification.user_id == current_user.id,
             models.RecruiterNotification.is_read == False
         )
-        .count()
+        .all()
     )
-
-    if unread_count == 0 and current_user.role in ["recruiter", "admin", "hr", "account_manager"]:
+    if not unread_notifs and current_user.role in ["recruiter", "admin", "hr", "account_manager"]:
         total_for_user = db.query(models.RecruiterNotification).filter(models.RecruiterNotification.user_id == current_user.id).count()
         if total_for_user == 0:
-            unread_count = db.query(models.RecruiterNotification).filter(models.RecruiterNotification.is_read == False).count()
+            unread_notifs = (
+                db.query(models.RecruiterNotification)
+                .filter(
+                    models.RecruiterNotification.user_id.is_(None),
+                    models.RecruiterNotification.is_read == False
+                )
+                .all()
+            )
 
-    return {"unread_count": unread_count}
+    seen = set()
+    unique_unread = 0
+    for n in unread_notifs:
+        key = n.report_id if n.report_id else f"notif_{n.id}"
+        if key not in seen:
+            seen.add(key)
+            unique_unread += 1
+
+    return {"unread_count": unique_unread}
 
 
 @app.post("/api/v1/notifications/{notification_id}/read")

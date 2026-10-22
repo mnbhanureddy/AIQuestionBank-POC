@@ -503,13 +503,32 @@ export default function Home() {
     setCandidateReportModalOpen(true);
     setCandidateViewingReport(null);
     try {
-      const res = await authFetch(`${API}/api/v1/candidate/my-reports/${reportId}`);
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.detail || 'Failed to load evaluation report details');
+      const activeToken = inviteToken || candidateAssessmentData?.invitation_token || candidateAssessmentResult?.invitation_token;
+      if (activeToken) {
+        const pubRes = await fetch(`${API}/api/v1/assessment/public-report/${activeToken}`).catch(() => null);
+        if (pubRes && pubRes.ok) {
+          const pubData = await pubRes.json();
+          setCandidateViewingReport(pubData);
+          return;
+        }
       }
-      const data = await res.json();
-      setCandidateViewingReport(data);
+
+      const res = await authFetch(`${API}/api/v1/candidate/my-reports/${reportId}`).catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json();
+        setCandidateViewingReport(data);
+        return;
+      }
+
+      // Fallback for recruiter/public sessions
+      const reportRes = await authFetch(`${API}/api/v1/reports/${reportId}`).catch(() => null);
+      if (reportRes && reportRes.ok) {
+        const repData = await reportRes.json();
+        setCandidateViewingReport(repData);
+        return;
+      }
+
+      throw new Error('Failed to load evaluation report details');
     } catch (err: any) {
       showError(err.message || 'Could not load report details.', 'Report Error');
     } finally {
@@ -2559,14 +2578,29 @@ export default function Home() {
       if (!res.ok) return;
       const data = await res.json();
       const notifs: RecruiterNotificationItem[] = Array.isArray(data.notifications) ? data.notifications : [];
-      setNotifications(notifs);
-      setUnreadNotifCount(typeof data.unread_count === 'number' ? data.unread_count : notifs.filter(n => !n.is_read).length);
 
-      // Detect newly arrived notifications to trigger real-time alert toast
+      // Deduplicate notifications by report_id so multiple rows for 1 evaluation report are never shown
+      const seenReports = new Set<string>();
+      const uniqueNotifs: RecruiterNotificationItem[] = [];
+      for (const n of notifs) {
+        const key = n.report_id ? `report_${n.report_id}` : `notif_${n.id}`;
+        if (!seenReports.has(key)) {
+          seenReports.add(key);
+          uniqueNotifs.push(n);
+        }
+      }
+
+      setNotifications(uniqueNotifs);
+      setUnreadNotifCount(uniqueNotifs.filter(n => !n.is_read).length);
+
+      // Detect newly arrived notifications to trigger real-time alert toast (at most 1 toast per report)
       if (!initialLoad && prevNotifIdsRef.current.size > 0) {
-        const newUnread = notifs.filter(n => !n.is_read && !prevNotifIdsRef.current.has(n.id));
+        const newUnread = uniqueNotifs.filter(n => !n.is_read && !prevNotifIdsRef.current.has(n.id));
         if (newUnread.length > 0) {
+          const alertedReports = new Set<number>();
           newUnread.forEach(n => {
+            if (n.report_id && alertedReports.has(n.report_id)) return;
+            if (n.report_id) alertedReports.add(n.report_id);
             const candidateInfo = n.candidate_name || 'Candidate';
             const roleInfo = n.job_title ? ` for ${n.job_title}` : '';
             const scoreInfo = n.score_percentage != null ? ` (${n.score_percentage}%)` : '';
@@ -2582,7 +2616,7 @@ export default function Home() {
       }
 
       // Track known notification ids
-      prevNotifIdsRef.current = new Set(notifs.map(n => n.id));
+      prevNotifIdsRef.current = new Set(uniqueNotifs.map(n => n.id));
     } catch {
       // background sync
     } finally {
@@ -4015,12 +4049,13 @@ export default function Home() {
                       className="ta-btn"
                       style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: '#fff', padding: '10px 24px', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 14px rgba(2, 132, 199, 0.25)' }}
                       onClick={() => {
-                        if (candidateAssessmentResult?.report_id) {
+                        const token = inviteToken || candidateAssessmentResult?.invitation_token || candidateAssessmentData?.invitation_token;
+                        if (token) {
+                          openCandidatePublicReportModal(token);
+                        } else if (candidateAssessmentResult?.report_id) {
                           openCandidateReportModal(candidateAssessmentResult.report_id);
-                        } else if (inviteToken) {
-                          openCandidatePublicReportModal(inviteToken);
-                        } else if (candidateAssessmentData?.invitation_token) {
-                          openCandidatePublicReportModal(candidateAssessmentData.invitation_token);
+                        } else if (candidateAssessmentResult?.evaluation_report_id) {
+                          openCandidateReportModal(candidateAssessmentResult.evaluation_report_id);
                         }
                       }}
                     >
@@ -6911,12 +6946,12 @@ export default function Home() {
                                 Score: {inv.score_percentage}%
                               </strong>
                             )}
-                            {inv.report_id && (
+                            {(inv.report_id || inv.evaluation_report_id) && (
                               <button
                                 className="ta-btn secondary"
                                 style={{ padding: '4px 10px', fontSize: 11.5 }}
                                 onClick={() => {
-                                  viewReport(inv.report_id);
+                                  viewReport(inv.report_id || inv.evaluation_report_id);
                                   goTo('reports');
                                 }}
                               >
@@ -7658,14 +7693,6 @@ export default function Home() {
                     }}
                   >
                     Proceed to Job Match <span>→</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => goTo('generate')}
-                    className="ta-btn success"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                  >
-                    Proceed to Assessment Config <span>→</span>
                   </button>
                 </div>
               </div>
@@ -9236,13 +9263,13 @@ export default function Home() {
                                 <span className="ta-badge-submitted">
                                   ✓ Submitted ({inv.score_percentage != null ? `${inv.score_percentage}%` : 'Done'})
                                 </span>
-                                {inv.evaluation_report_id && (
+                                {(inv.evaluation_report_id || inv.report_id) && (
                                   <button
                                     type="button"
                                     className="ta-btn secondary"
                                     style={{ padding: '3px 8px', fontSize: 11.5 }}
                                     onClick={() => {
-                                      viewReport(inv.evaluation_report_id);
+                                      viewReport(inv.evaluation_report_id || inv.report_id);
                                       goTo('reports');
                                     }}
                                   >
