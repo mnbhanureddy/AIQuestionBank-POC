@@ -37,6 +37,7 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "https://talentassessmentai.onrender.com",
     ],
+    allow_origin_regex=r"https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
