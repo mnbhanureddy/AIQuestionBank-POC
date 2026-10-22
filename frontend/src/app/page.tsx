@@ -2947,6 +2947,27 @@ export default function Home() {
     }
   };
 
+  const resolveInvitationLink = (linkOrToken?: string, token?: string) => {
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://talentassessmentai.onrender.com';
+    if (!linkOrToken && token) {
+      return `${currentOrigin}?invite_token=${token}`;
+    }
+    if (!linkOrToken) return currentOrigin;
+    if (linkOrToken.includes('localhost:3000') || linkOrToken.includes('127.0.0.1:3000')) {
+      return linkOrToken.replace(/https?:\/\/(localhost|127\.0\.0\.1):3000/g, currentOrigin);
+    }
+    return linkOrToken;
+  };
+
+  const resolvePortalUrl = (portalUrl?: string) => {
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://talentassessmentai.onrender.com';
+    if (!portalUrl) return currentOrigin;
+    if (portalUrl.includes('localhost:3000') || portalUrl.includes('127.0.0.1:3000')) {
+      return portalUrl.replace(/https?:\/\/(localhost|127\.0\.0\.1):3000/g, currentOrigin);
+    }
+    return portalUrl;
+  };
+
   const getMailtoUrl = (inv: any) => {
     const candidateName = inv.candidate_name || 'Candidate';
     const jobTitle = inv.job_title || 'Role Assessment';
@@ -2954,8 +2975,8 @@ export default function Home() {
     const numQ = inv.num_questions || 5;
     const diff = inv.difficulty || 'Standard';
     const duration = inv.duration_minutes || 15;
-    const link = inv.invitation_link || (inv.invitation_token ? `http://localhost:3000?invite_token=${inv.invitation_token}` : 'http://localhost:3000');
-    const portalUrl = inv.candidate_portal_url || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const link = resolveInvitationLink(inv.invitation_link, inv.invitation_token);
+    const portalUrl = resolvePortalUrl(inv.candidate_portal_url);
     const loginEmail = inv.candidate_login_email || inv.candidate_email;
     const tempPass = inv.candidate_temp_password || '(Password generated - check portal)';
 
@@ -3033,7 +3054,8 @@ export default function Home() {
 
   const handleCopyInviteLink = (invite: any) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(invite.invitation_link);
+      const link = resolveInvitationLink(invite.invitation_link, invite.invitation_token);
+      navigator.clipboard.writeText(link);
       setCopiedInviteId(invite.invitation_id);
       showInfo(`Copied test link for ${invite.candidate_name} to clipboard.`, 'Link Copied');
       setTimeout(() => setCopiedInviteId(null), 2500);
@@ -3043,8 +3065,8 @@ export default function Home() {
   const handleCopyCandidateCredentials = (inv: any) => {
     const loginEmail = inv.candidate_login_email || inv.candidate_email;
     const tempPass = inv.candidate_temp_password || '(Auto-Provisioned)';
-    const link = inv.invitation_link || (inv.invitation_token ? `http://localhost:3000?invite_token=${inv.invitation_token}` : 'http://localhost:3000');
-    const portalUrl = inv.candidate_portal_url || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const link = resolveInvitationLink(inv.invitation_link, inv.invitation_token);
+    const portalUrl = resolvePortalUrl(inv.candidate_portal_url);
 
     const credsText = [
       `═══════════════════════════════════════════════════════`,
@@ -8989,7 +9011,7 @@ export default function Home() {
                                   <input
                                     type="text"
                                     readOnly
-                                    value={inv.invitation_link}
+                                    value={resolveInvitationLink(inv.invitation_link, inv.invitation_token)}
                                     className="ta-input"
                                     style={{ flex: 1, minWidth: 220, fontSize: 12, padding: '5px 8px', background: '#ffffff', color: '#0369a1', fontWeight: 500 }}
                                   />
@@ -9002,7 +9024,7 @@ export default function Home() {
                                     {copiedInviteId === inv.invitation_id ? '✓ Copied' : '📋 Copy Link'}
                                   </button>
                                   <a
-                                    href={inv.invitation_link}
+                                    href={resolveInvitationLink(inv.invitation_link, inv.invitation_token)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="ta-btn"
@@ -9175,7 +9197,7 @@ export default function Home() {
                             <input
                               type="text"
                               readOnly
-                              value={inv.invitation_link}
+                              value={resolveInvitationLink(inv.invitation_link, inv.invitation_token)}
                               className="ta-input"
                               style={{ fontSize: 11.5, padding: '4px 8px', background: '#f8fafc', color: '#475569' }}
                             />
@@ -9198,7 +9220,7 @@ export default function Home() {
                               {copiedCredsCandidateId === inv.invitation_id ? '✓ Copied' : '📋 Copy Login'}
                             </button>
                             <a
-                              href={inv.invitation_link}
+                              href={resolveInvitationLink(inv.invitation_link, inv.invitation_token)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="ta-btn secondary"

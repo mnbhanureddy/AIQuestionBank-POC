@@ -79,7 +79,7 @@ class EmailService:
         # Candidate login snippet
         login_snippet_text = ""
         if candidate_login_email and candidate_password:
-            p_link = portal_link or "http://localhost:3000"
+            p_link = portal_link or get_frontend_base_url()
             login_snippet_text = f"""
 CANDIDATE USER LOGIN CREDENTIALS:
 • Candidate Portal URL: {p_link}
@@ -203,7 +203,7 @@ Powered by TalentAssess AI
                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td style="padding:4px 0; font-size:13px; color:#0f172a;">
-                          <strong>Candidate Portal URL:</strong> <a href="{portal_link or 'http://localhost:3000'}" style="color:#0284c7; text-decoration:underline;">{portal_link or 'http://localhost:3000'}</a>
+                          <strong>Candidate Portal URL:</strong> <a href="{p_link}" style="color:#0284c7; text-decoration:underline;">{p_link}</a>
                         </td>
                       </tr>
                       <tr>
@@ -641,13 +641,14 @@ TalentAssess AI Notification System
         organization_name: str = "TalentAssess AI",
         score_percentage: Optional[float] = None,
         report_id: Optional[int] = None,
-        portal_url: str = "http://localhost:3000"
+        portal_url: Optional[str] = None
     ) -> Tuple[bool, str]:
         """
         Sends an automated confirmation email to the candidate acknowledging
         their assessment submission and providing portal link to check results.
         """
         config = EmailService.get_smtp_config()
+        effective_portal_url = portal_url or get_frontend_base_url()
         if not EmailService.is_configured():
             return False, "SMTP is not configured in backend/.env."
         if not candidate_email or "@" not in candidate_email or candidate_email.endswith("@example.com"):
@@ -671,7 +672,7 @@ TalentAssess AI Notification System
                 f"Thank you for completing your evaluation assessment for the {job_title} position at {organization_name}.\n\n"
                 f"Your assessment has been successfully submitted and evaluated.\n"
                 f"{score_text}\n"
-                f"You can log into your Candidate Portal at {portal_url} to review your profile and status.\n\n"
+                f"You can log into your Candidate Portal at {effective_portal_url} to review your profile and status.\n\n"
                 f"Best regards,\n"
                 f"Recruitment Team\n"
                 f"{organization_name}"
@@ -697,7 +698,7 @@ TalentAssess AI Notification System
       </div>
       <p>You can access your candidate account to view your evaluation report and status:</p>
       <div style="text-align: center; margin: 24px 0;">
-        <a href="{portal_url}" style="background: #059669; color: #ffffff; padding: 11px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
+        <a href="{effective_portal_url}" style="background: #059669; color: #ffffff; padding: 11px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
           Go to Candidate Portal →
         </a>
       </div>

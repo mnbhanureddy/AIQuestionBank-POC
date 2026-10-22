@@ -1997,7 +1997,7 @@ def submit_candidate_assessment(
                 organization_name=org_name,
                 score_percentage=score_pct,
                 report_id=report.id,
-                portal_url="http://localhost:3000"
+                portal_url=get_frontend_base_url()
             )
             print(f"[CANDIDATE CONFIRMATION EMAIL] Dispatched to {invitation.candidate_email}: {cand_ok} - {cand_msg}")
         except Exception as e:
@@ -2258,9 +2258,9 @@ def list_assessment_invitations(
             "candidate_user_id": inv.candidate_user_id,
             "candidate_login_email": inv.candidate_email,
             "candidate_temp_password": getattr(inv, "candidate_temp_password", None),
-            "candidate_portal_url": "http://localhost:3000",
+            "candidate_portal_url": get_frontend_base_url(),
             "invitation_token": inv.invitation_token,
-            "invitation_link": f"http://localhost:3000?invite_token={inv.invitation_token}",
+            "invitation_link": f"{get_frontend_base_url()}?invite_token={inv.invitation_token}",
             "status": inv.status,
             "email_sent": inv.email_sent,
             "email_delivery_status": inv.email_delivery_status,
