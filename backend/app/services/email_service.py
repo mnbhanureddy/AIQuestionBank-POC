@@ -8,6 +8,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def get_frontend_base_url() -> str:
+    url = os.getenv("FRONTEND_BASE_URL", "").strip()
+    if url:
+        return url.rstrip("/")
+    if os.getenv("RENDER"):
+        return "https://talentassessmentai.onrender.com"
+    return "http://localhost:3000"
+
+
 class EmailService:
     """Service to handle automated candidate assessment email invitations and notifications."""
 
@@ -384,7 +393,7 @@ Powered by TalentAssess AI
             return False, f"Invalid or missing recruiter email: '{recruiter_email}'"
 
         try:
-            frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
+            frontend_url = get_frontend_base_url()
             if not report_link and report_id:
                 report_link = f"{frontend_url}/?view_report={report_id}"
             elif not report_link:
@@ -742,7 +751,7 @@ TalentAssess AI Notification System
             return False, f"Invalid or missing user email: '{user_email}'"
 
         try:
-            frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
+            frontend_url = get_frontend_base_url()
             role_display = {
                 "admin": "Administrator",
                 "account_manager": "Account Manager",

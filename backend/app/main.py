@@ -25,7 +25,16 @@ from app.db.database import Base, engine, get_db
 from app import models
 from app.auth import hash_password, verify_password, create_access_token, get_current_user, get_current_user_optional
 from pydantic import BaseModel
-FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
+
+def get_frontend_base_url() -> str:
+    url = os.getenv("FRONTEND_BASE_URL", "").strip()
+    if url:
+        return url.rstrip("/")
+    if os.getenv("RENDER"):
+        return "https://talentassessmentai.onrender.com"
+    return "http://localhost:3000"
+
+FRONTEND_BASE_URL = get_frontend_base_url()
 
 app = FastAPI(title="AI Recruitment & Training Assessment Platform")
 
@@ -1519,7 +1528,7 @@ def invite_candidates(
     job_title = (sm.filename or sm.role_or_topic) if sm else "Role Assessment"
     num_q = assessment.num_questions or 5
     diff = assessment.difficulty or "Intermediate"
-    frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
+    frontend_url = get_frontend_base_url()
 
     invitations = []
     for c in candidate_list:
@@ -1635,7 +1644,7 @@ def resend_invitation(
     owner = sm.owner if sm else current_user
     org_name = (sm.organization_name if sm and sm.organization_name else None) or (owner.organization_name if owner else None) or "TalentAssess AI"
     job_title = (sm.filename or sm.role_or_topic) if sm else "Role Assessment"
-    frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
+    frontend_url = get_frontend_base_url()
     invitation_link = f"{frontend_url}?invite_token={invitation.invitation_token}"
 
     inv_duration = invitation.duration_minutes or 15
@@ -1699,7 +1708,7 @@ def get_invitation_preview(
     owner = (sm.owner if sm else None) or current_user
     org_name = (sm.organization_name if sm and sm.organization_name else None) or (current_user.organization_name if current_user and current_user.organization_name else None) or (owner.organization_name if owner else None) or "TalentAssess AI"
     job_title = (sm.filename or sm.role_or_topic) if sm else "Role Assessment"
-    frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
+    frontend_url = get_frontend_base_url()
     invitation_link = f"{frontend_url}?invite_token={invitation.invitation_token}"
 
     inv_duration = invitation.duration_minutes or 15
