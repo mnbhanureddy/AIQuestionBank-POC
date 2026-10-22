@@ -1,4 +1,3 @@
-FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
 from fastapi import FastAPI, Form, File, UploadFile, HTTPException, Depends, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +25,7 @@ from app.db.database import Base, engine, get_db
 from app import models
 from app.auth import hash_password, verify_password, create_access_token, get_current_user, get_current_user_optional
 from pydantic import BaseModel
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
 
 app = FastAPI(title="AI Recruitment & Training Assessment Platform")
 
